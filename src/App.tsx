@@ -1,46 +1,42 @@
-import { useMemo, useRef, useState } from "react"
-
-type Range = "1시간" | "6시간" | "24시간"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { createClient } from "@supabase/supabase-js"
 
 type SensorPoint = {
+  id: string
   label: string
+  timestamp: number
   value: 0 | 1
 }
 
-const SENSOR_DATA: Record<Range, SensorPoint[]> = {
-  "1시간": [
-    { label: "14:00", value: 0 },
-    { label: "14:10", value: 1 },
-    { label: "14:20", value: 1 },
-    { label: "14:30", value: 0 },
-    { label: "14:40", value: 1 },
-    { label: "14:50", value: 0 },
-    { label: "15:00", value: 1 },
-  ],
-  "6시간": [
-    { label: "09:00", value: 0 },
-    { label: "10:00", value: 0 },
-    { label: "11:00", value: 1 },
-    { label: "12:00", value: 1 },
-    { label: "13:00", value: 0 },
-    { label: "14:00", value: 1 },
-    { label: "15:00", value: 1 },
-  ],
-  "24시간": [
-    { label: "어제 15시", value: 1 },
-    { label: "19:00", value: 0 },
-    { label: "23:00", value: 0 },
-    { label: "03:00", value: 1 },
-    { label: "07:00", value: 0 },
-    { label: "11:00", value: 1 },
-    { label: "15:00", value: 1 },
-  ],
-}
-
-const RANGE_LABELS: Range[] = ["1시간", "6시간", "24시간"]
 const CHART_WIDTH = 900
 const CHART_HEIGHT = 300
 const CHART_PADDING = { top: 22, right: 22, bottom: 42, left: 46 }
+
+type ReadingRow = {
+  id: string | number
+  value: unknown
+  created_at: string
+}
+
+function toSensorPoint(row: ReadingRow): SensorPoint | null {
+  if (
+    row.value !== 0 &&
+    row.value !== 1 &&
+    row.value !== "0" &&
+    row.value !== "1"
+  ) {
+    return null
+  }
+  const timestamp = new Date(row.created_at)
+  if (Number.isNaN(timestamp.getTime())) return null
+
+  return {
+    id: String(row.id),
+    label: timestamp.toLocaleTimeString("ko-KR"),
+    timestamp: timestamp.getTime(),
+    value: row.value === 1 || row.value === "1" ? 1 : 0,
+  }
+}
 
 type SerialPort = {
   open(options: { baudRate: number }): Promise<void>
@@ -156,7 +152,10 @@ function LineChart({ points }: { points: SensorPoint[] }) {
 }
 
 export default function App() {
-  const [range, setRange] = useState<Range>("1시간")
+  const [dbPoints, setDbPoints] = useState<SensorPoint[]>([])
+  const [isDbLoading, setIsDbLoading] = useState(true)
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false)
+  const [dbError, setDbError] = useState("")
   const [livePoints, setLivePoints] = useState<SensorPoint[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
@@ -165,10 +164,9 @@ export default function App() {
   const readerRef = useRef<ReadableStreamDefaultReader<Uint8Array> | null>(null)
   const portRef = useRef<SerialPort | null>(null)
   const disconnectRequestedRef = useRef(false)
-  const points =
-    isConnected || livePoints.length > 0 ? livePoints : SENSOR_DATA[range]
+  const points = isConnected && livePoints.length > 0 ? livePoints : dbPoints
   const latestValue = isConnected
-    ? livePoints.at(-1)?.value
+    ? (livePoints.at(-1)?.value ?? dbPoints.at(-1)?.value)
     : points.at(-1)?.value
 
   const stats = useMemo(() => {
@@ -179,6 +177,115 @@ export default function App() {
       total: points.length,
     }
   }, [points])
+
+  useEffect(() => {
+    const url = import.meta.env.VITE_SUPABASE_URL
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    if (!url || !anonKey) {
+      setDbError(
+        ".env에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY가 설정되어 있는지 확인해 주세요.",
+      )
+      setIsDbLoading(false)
+      return
+    }
+
+    let supabase: ReturnType<typeof createClient>
+    try {
+      supabase = createClient(url, anonKey)
+    } catch (error) {
+      setDbError(
+        error instanceof Error
+          ? `Supabase 설정을 확인해 주세요: ${error.message}`
+          : "Supabase 설정을 확인해 주세요.",
+      )
+      setIsDbLoading(false)
+      return
+    }
+    let active = true
+    let realtimeRows: SensorPoint[] = []
+    let channel: ReturnType<typeof supabase.channel> | undefined
+
+    const loadReadings = async () => {
+      const { data, error } = await supabase
+        .from("readings")
+        .select("id, value, created_at")
+        .order("created_at", { ascending: false })
+        .limit(100)
+
+      if (!active) return
+      if (error) {
+        setDbError(`readings 테이블을 불러오지 못했습니다: ${error.message}`)
+        setIsDbLoading(false)
+        return
+      }
+
+      const fetchedPoints = (data as ReadingRow[])
+        .map(toSensorPoint)
+        .filter((point): point is SensorPoint => point !== null)
+        .reverse()
+      const byId = new Map(
+        [...fetchedPoints, ...realtimeRows].map((point) => [point.id, point]),
+      )
+      const mergedPoints = [...byId.values()]
+        .sort((left, right) => left.timestamp - right.timestamp)
+        .slice(-100)
+      setDbPoints(mergedPoints)
+      if (mergedPoints.length > 0) {
+        setLastUpdated(new Date(mergedPoints.at(-1)!.timestamp))
+      }
+      setIsDbLoading(false)
+      setDbError("")
+    }
+
+    channel = supabase
+      .channel("readings-dashboard")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "readings" },
+        (payload) => {
+          const point = toSensorPoint(payload.new as ReadingRow)
+          if (!point) return
+          realtimeRows = [...realtimeRows, point].slice(-100)
+          if (!active) return
+          setDbError("")
+
+          setDbPoints((current) => {
+            const withoutDuplicate = current.filter(
+              (existing) => existing.id !== point.id,
+            )
+            return [...withoutDuplicate, point]
+              .sort((left, right) => left.timestamp - right.timestamp)
+              .slice(-100)
+          })
+          setLastUpdated(new Date(point.timestamp))
+        },
+      )
+      .subscribe((status, error) => {
+        if (!active) return
+        setIsRealtimeConnected(status === "SUBSCRIBED")
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setDbError(
+            error?.message ??
+              "Supabase Realtime 구독에 실패했습니다. readings 테이블의 Realtime 설정을 확인해 주세요.",
+          )
+        }
+      })
+
+    void loadReadings().catch((error: unknown) => {
+      if (!active) return
+      setDbError(
+        error instanceof Error
+          ? `readings 테이블을 불러오지 못했습니다: ${error.message}`
+          : "readings 테이블을 불러오지 못했습니다.",
+      )
+      setIsDbLoading(false)
+    })
+
+    return () => {
+      active = false
+      if (channel) void supabase.removeChannel(channel)
+    }
+  }, [])
 
   const disconnectSerial = async () => {
     disconnectRequestedRef.current = true
@@ -258,7 +365,17 @@ export default function App() {
           minute: "2-digit",
           second: "2-digit",
         })
-        setLivePoints((current) => [...current, { label, value }].slice(-100))
+        setLivePoints((current) =>
+          [
+            ...current,
+            {
+              id: `${Date.now()}-${current.length}`,
+              label,
+              timestamp: Date.now(),
+              value,
+            },
+          ].slice(-100),
+        )
       }
 
       while (true) {
@@ -362,6 +479,11 @@ export default function App() {
             {connectionError}
           </p>
         )}
+        {dbError && (
+          <p className="connection-error" role="alert">
+            {dbError}
+          </p>
+        )}
 
         <section className="dashboard-grid" aria-label="센서 요약">
           <article className="card current-card">
@@ -376,10 +498,18 @@ export default function App() {
                 </div>
               </div>
               <span
-                className={`status-pill ${isConnected ? "" : "disconnected"}`}
+                className={`status-pill ${
+                  isConnected || isRealtimeConnected ? "" : "disconnected"
+                }`}
               >
                 <span />
-                {isConnected ? "수신 중" : "대기 중"}
+                {isConnected
+                  ? "시리얼 수신 중"
+                  : isRealtimeConnected
+                    ? "Realtime 연결됨"
+                    : isDbLoading
+                      ? "불러오는 중"
+                      : "연결 대기"}
               </span>
             </div>
 
@@ -404,8 +534,10 @@ export default function App() {
                 </span>
               ) : isConnected ? (
                 <span>시리얼 데이터 수신 대기 중</span>
+              ) : isDbLoading ? (
+                <span>Supabase에서 데이터를 불러오는 중입니다.</span>
               ) : (
-                <span>디지털 센서 상태</span>
+                <span>Supabase readings 테이블 기준</span>
               )}
             </div>
           </article>
@@ -430,7 +562,7 @@ export default function App() {
                 <dd>{stats.offCount}</dd>
               </div>
               <div>
-                <dt>전체 기록</dt>
+                <dt>최근 기록</dt>
                 <dd>{stats.total}</dd>
               </div>
             </dl>
@@ -442,26 +574,12 @@ export default function App() {
             <div>
               <p className="section-title">시간별 센서 변화</p>
               <span className="section-subtitle">
-                센서값이 시간에 따라 어떻게 변했는지 확인하세요.
+                readings 테이블의 최신 100개 값 · Supabase Realtime
               </span>
             </div>
-            {livePoints.length > 0 ? (
-              <span className="live-range">최근 {livePoints.length}개</span>
-            ) : (
-              <div className="range-tabs" aria-label="조회 기간">
-                {RANGE_LABELS.map((label) => (
-                  <button
-                    key={label}
-                    type="button"
-                    className={range === label ? "active" : ""}
-                    onClick={() => setRange(label)}
-                    aria-pressed={range === label}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
+            <span className="live-range">
+              {isRealtimeConnected ? "실시간 업데이트 중" : "최근 기록"}
+            </span>
           </div>
 
           <div className="chart-meta">
