@@ -43,9 +43,6 @@ export default function SensorMoon({ value, power }: Props) {
       >
         <img src="/images/light-wallpaper.webp" alt="" />
       </div>
-      <p className="t-value sensor-value">
-        {value === undefined ? "—" : value.toLocaleString("ko-KR")}
-      </p>
     </section>
   )
 }

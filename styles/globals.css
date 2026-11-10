@@ -130,11 +130,7 @@ h1 {
 }
 
 .moon-section {
-  min-height: var(--moon-stage-min);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  height: 0;
 }
 
 .light-visual {
@@ -170,17 +166,16 @@ h1 {
   filter: brightness(0.28) grayscale(0.65);
 }
 
-.sensor-value {
-  margin-top: var(--space-6);
-}
-
 .data-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-8);
+  gap: var(--space-12);
+  margin-top: var(--space-6);
 }
 
 .controls {
+  width: 100%;
+  max-width: var(--description-max);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -341,10 +336,6 @@ h1 {
     padding: var(--space-12) var(--space-8);
   }
 
-  .data-grid {
-    grid-template-columns: 1fr 2fr;
-    gap: var(--space-12);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
