@@ -144,3 +144,7 @@
 *.stl                filter=lfs diff=lfs merge=lfs -text
 *.nc                 filter=lfs diff=lfs merge=lfs -text
 *.mat                filter=lfs diff=lfs merge=lfs -text
+
+# Deployment assets must be available to GitHub Pages without an LFS checkout.
+public/fonts/*.woff2 -filter -diff -merge -text
+public/images/*.webp -filter -diff -merge -text

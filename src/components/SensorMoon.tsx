@@ -21,6 +21,7 @@ type VisualStyle = CSSProperties & {
 }
 
 export default function SensorMoon({ value, power }: Props) {
+  const wallpaperSrc = `${import.meta.env.BASE_URL}images/light-wallpaper.webp`
   const level =
     value === undefined
       ? 0
@@ -57,12 +58,12 @@ export default function SensorMoon({ value, power }: Props) {
       >
         <img
           className="light-layer light-layer-base"
-          src="/images/light-wallpaper.webp"
+          src={wallpaperSrc}
           alt=""
         />
         <img
           className="light-layer light-layer-shape"
-          src="/images/light-wallpaper.webp"
+          src={wallpaperSrc}
           alt=""
         />
       </div>
