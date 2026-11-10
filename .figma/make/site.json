@@ -1,5 +1,5 @@
 {
-  "description": "터치 센서의 현재 값을 크게 보여주고 시간별 변화를 선 그래프로 시각화해 센서 상태를 한눈에 확인할 수 있는 대시보드입니다.",
+  "description": "A project setup and verification tool that prepares imported apps for deployment, helping developers catch configuration issues before release.",
   "robots": {
     "index": false
   },
