@@ -33,7 +33,9 @@ export default function ConnectionControl({ status, onToggle }: Props) {
         disabled={status === "connecting"}
         onClick={() => void onToggle()}
       >
-        {connected ? "연결 끊기" : "센서 연결"}
+        <span className="action-button-label">
+          {connected ? "연결 끊기" : "센서 연결"}
+        </span>
       </button>
     </div>
   )
