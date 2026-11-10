@@ -1,5 +1,5 @@
 {
-  "description": "A project setup and verification tool that prepares imported apps for deployment, helping developers catch configuration issues before release.",
+  "description": "센서 상태와 시간에 따른 변화를 실시간으로 확인하고 조명 전원을 제어하는 터치 센서 대시보드입니다.",
   "robots": {
     "index": false
   },
