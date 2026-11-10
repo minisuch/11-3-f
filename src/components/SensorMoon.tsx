@@ -37,13 +37,13 @@ export default function SensorMoon({ value, power }: Props) {
     "--shift-x": `${(0.5 - level) * 12}%`,
     "--shift-y": `${(0.5 - level) * -16}%`,
     "--visual-scale": 1.22 + level * 0.08,
-    "--shape-x": `${18 + level * 64}%`,
-    "--shape-y": `${72 - level * 44}%`,
-    "--shape-rx": `${24 + level * 22}%`,
-    "--shape-ry": `${52 - level * 18}%`,
-    "--shape-shift-x": `${(level - 0.5) * 18}%`,
-    "--shape-shift-y": `${(0.5 - level) * 22}%`,
-    "--shape-scale": 1.3 - level * 0.12,
+    "--shape-x": `${38 + level * 24}%`,
+    "--shape-y": `${60 - level * 20}%`,
+    "--shape-rx": `${30 + level * 8}%`,
+    "--shape-ry": `${44 - level * 6}%`,
+    "--shape-shift-x": `${(level - 0.5) * 6}%`,
+    "--shape-shift-y": `${(0.5 - level) * 8}%`,
+    "--shape-scale": 1.26 - level * 0.04,
   } as VisualStyle
 
   return (

@@ -15,7 +15,7 @@ export default function PowerToggle({ power, onChange }: Props) {
   }
 
   return (
-    <div>
+    <div className="power-control">
       <div className="control-row">
         <div>
           <p className="t-label control-name">LED 전원</p>

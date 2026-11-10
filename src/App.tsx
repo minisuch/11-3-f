@@ -55,26 +55,30 @@ export default function App() {
       <SensorMoon value={readings.at(-1)?.value} power={power} />
       <div className="data-grid">
         <section className="controls" aria-label="조명 제어">
-          <ConnectionControl status={status} onToggle={handleConnection} />
-          <PowerToggle power={power} onChange={handlePowerChange} />
-          <div className="control-row">
-            <div>
-              <p className="t-label control-name">그래프</p>
-              <p className="t-caption power-status">
-                {isChartVisible ? "표시 중" : "숨김"}
-              </p>
+          <div className="control-columns">
+            <div className="sensor-control-stack">
+              <ConnectionControl status={status} onToggle={handleConnection} />
+              <div className="control-row">
+                <div>
+                  <p className="t-label control-name">그래프</p>
+                  <p className="t-caption power-status">
+                    {isChartVisible ? "표시 중" : "숨김"}
+                  </p>
+                </div>
+                <button
+                  className="t-label action-button"
+                  type="button"
+                  aria-controls="sensor-chart"
+                  aria-expanded={isChartVisible}
+                  onClick={() => setIsChartVisible((visible) => !visible)}
+                >
+                  <span className="action-button-label">
+                    {isChartVisible ? "숨기기" : "보기"}
+                  </span>
+                </button>
+              </div>
             </div>
-            <button
-              className="t-label action-button"
-              type="button"
-              aria-controls="sensor-chart"
-              aria-expanded={isChartVisible}
-              onClick={() => setIsChartVisible((visible) => !visible)}
-            >
-              <span className="action-button-label">
-                {isChartVisible ? "숨기기" : "보기"}
-              </span>
-            </button>
+            <PowerToggle power={power} onChange={handlePowerChange} />
           </div>
         </section>
         <div
