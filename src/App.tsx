@@ -18,6 +18,7 @@ export default function App() {
   const [status, setStatus] = useState<Status>("disconnected")
   const [power, setPower] = useState(false)
   const [readings, setReadings] = useState<Reading[]>([])
+  const [isChartVisible, setIsChartVisible] = useState(true)
 
   useEffect(() => {
     void loadPower().then(setPower)
@@ -56,8 +57,33 @@ export default function App() {
         <section className="controls" aria-label="조명 제어">
           <ConnectionControl status={status} onToggle={handleConnection} />
           <PowerToggle power={power} onChange={handlePowerChange} />
+          <div className="control-row">
+            <div>
+              <p className="t-label control-name">그래프</p>
+              <p className="t-caption power-status">
+                {isChartVisible ? "표시 중" : "숨김"}
+              </p>
+            </div>
+            <button
+              className="t-label action-button"
+              type="button"
+              aria-controls="sensor-chart"
+              aria-expanded={isChartVisible}
+              onClick={() => setIsChartVisible((visible) => !visible)}
+            >
+              <span className="action-button-label">
+                {isChartVisible ? "숨기기" : "보기"}
+              </span>
+            </button>
+          </div>
         </section>
-        <SensorChart readings={readings} />
+        <div
+          className="chart-container"
+          id="sensor-chart"
+          hidden={!isChartVisible}
+        >
+          <SensorChart readings={readings} />
+        </div>
       </div>
     </main>
   )

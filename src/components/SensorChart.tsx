@@ -6,6 +6,7 @@ type Props = {
   readings: Reading[]
 }
 
+const CHART_HEIGHT = 200
 const PADDING = { left: 40, right: 8, top: 8, bottom: 20 }
 
 export default function SensorChart({ readings }: Props) {
@@ -23,12 +24,8 @@ export default function SensorChart({ readings }: Props) {
     return () => observer.disconnect()
   }, [])
 
-  const chartSize = width
   const innerWidth = Math.max(0, width - PADDING.left - PADDING.right)
-  const innerHeight = Math.max(
-    0,
-    chartSize - PADDING.top - PADDING.bottom,
-  )
+  const innerHeight = CHART_HEIGHT - PADDING.top - PADDING.bottom
   const points = readings
     .map((reading, index) => {
       const x =
@@ -60,8 +57,8 @@ export default function SensorChart({ readings }: Props) {
         <svg
           className="sensor-chart"
           width={width}
-          height={chartSize}
-          viewBox={`0 0 ${width} ${chartSize}`}
+          height={CHART_HEIGHT}
+          viewBox={`0 0 ${width} ${CHART_HEIGHT}`}
           role="img"
           aria-label={`센서값 추이, 현재 ${currentValue?.toLocaleString("ko-KR")}`}
         >
@@ -94,7 +91,7 @@ export default function SensorChart({ readings }: Props) {
           <text
             className="chart-label"
             x={PADDING.left}
-            y={chartSize - PADDING.right}
+            y={CHART_HEIGHT - PADDING.right}
             textAnchor="start"
           >
             −60s
@@ -102,7 +99,7 @@ export default function SensorChart({ readings }: Props) {
           <text
             className="chart-label"
             x={width - PADDING.right}
-            y={chartSize - PADDING.right}
+            y={CHART_HEIGHT - PADDING.right}
             textAnchor="end"
           >
             지금

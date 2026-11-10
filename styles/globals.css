@@ -2,17 +2,13 @@
 @font-face { font-family: "Pretendard"; src: url("/fonts/Pretendard-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Pretendard"; src: url("/fonts/Pretendard-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "Pretendard"; src: url("/fonts/Pretendard-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-/* 서브 폰트 Rising CHAI */
-@font-face { font-family: "Rising CHAI"; src: url("/fonts/RisingCHAI-Light.woff2") format("woff2"); font-weight: 300; font-display: swap; }
-@font-face { font-family: "Rising CHAI"; src: url("/fonts/RisingCHAI-ExtraBold.woff2") format("woff2"); font-weight: 800; font-display: swap; }
-
 :root {
   /* 학생 슬롯: 메인 컬러 (기본값 블루) */
   --brand: #2f5bff;
   --on-brand: #ffffff;
   /* 학생 슬롯: 폰트 (메인, 서브) */
   --font-sans: Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  --font-display: "Rising CHAI", Pretendard, -apple-system, sans-serif;
+  --font-display: Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 
   --surface: #000000;
   --ink: #eef0f3;
@@ -33,8 +29,8 @@ body { margin: 0; background: var(--surface); color: var(--ink); font-family: va
 button { border: 0; border-radius: 0; }
 
 /* 타입: 자간, 행간 지정 없음 */
-.t-display { font-family: var(--font-display); font-size: 40px; font-weight: 800; }
-.t-value   { font-family: var(--font-display); font-size: 48px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.t-display { font-family: var(--font-display); font-size: 40px; font-weight: 600; }
+.t-value   { font-family: var(--font-display); font-size: 48px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .t-body    { font-size: 16px; font-weight: 400; }
 .t-label   { font-size: 14px; font-weight: 500; }
 .t-caption { font-size: 12px; font-weight: 400; }
@@ -64,7 +60,8 @@ button { border: 0; border-radius: 0; }
   --switch-handle: 20px;
   --switch-shift: 16px;
   --status-dot: 8px;
-  --chart-max: 360px;
+  --chart-height: 200px;
+  --chart-max: 720px;
   --visual-opacity: 0.78;
   --visual-width: min(78vw, 420px);
 }
@@ -176,7 +173,7 @@ h1 {
   clip-path: ellipse(
     var(--shape-rx) var(--shape-ry) at var(--shape-x) var(--shape-y)
   );
-  opacity: 0.68;
+  opacity: 0.22;
   filter: brightness(calc(0.55 + 0.65 * var(--level)))
     saturate(calc(0.9 + 0.6 * var(--level)));
   transform: translate3d(var(--shape-shift-x), var(--shape-shift-y), 0)
@@ -315,14 +312,21 @@ h1 {
   margin-top: var(--space-2);
 }
 
+.chart-container {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+}
+
+.chart-container[hidden] {
+  display: none;
+}
+
 .chart-section {
   width: 100%;
   max-width: var(--chart-max);
   min-width: 0;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: var(--chart-height);
   justify-self: center;
 }
 
@@ -334,8 +338,7 @@ h1 {
 
 .sensor-chart {
   width: 100%;
-  height: auto;
-  aspect-ratio: 1;
+  height: var(--chart-height);
   display: block;
   overflow: visible;
 }
