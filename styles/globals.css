@@ -1,0 +1,341 @@
+/* 메인 폰트 Pretendard */
+@font-face { font-family: "Pretendard"; src: url("/fonts/Pretendard-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Pretendard"; src: url("/fonts/Pretendard-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Pretendard"; src: url("/fonts/Pretendard-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+/* 서브 폰트 Rising CHAI */
+@font-face { font-family: "Rising CHAI"; src: url("/fonts/RisingCHAI-Light.woff2") format("woff2"); font-weight: 300; font-display: swap; }
+@font-face { font-family: "Rising CHAI"; src: url("/fonts/RisingCHAI-ExtraBold.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+
+:root {
+  /* 학생 슬롯: 메인 컬러 (기본값 블루) */
+  --brand: #2f5bff;
+  --on-brand: #ffffff;
+  /* 학생 슬롯: 폰트 (메인, 서브) */
+  --font-sans: Pretendard, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-display: "Rising CHAI", Pretendard, -apple-system, sans-serif;
+
+  --surface: #000000;
+  --ink: #eef0f3;
+  --ink-muted: #9a9ea7;
+  --line: #2a2d33;
+  --off: #5d6169;
+  --moon-glow: #9db8ff;
+  --status-on: #4cc38a;
+  --danger: #f97066;
+
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px;
+  color-scheme: dark;
+}
+
+body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font-sans); }
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+button { border: 0; border-radius: 0; }
+
+/* 타입: 자간, 행간 지정 없음 */
+.t-display { font-family: var(--font-display); font-size: 40px; font-weight: 800; }
+.t-value   { font-family: var(--font-display); font-size: 48px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.t-body    { font-size: 16px; font-weight: 400; }
+.t-label   { font-size: 14px; font-weight: 500; }
+.t-caption { font-size: 12px; font-weight: 400; }
+@media (max-width: 767px) { .t-display { font-size: 24px; } }
+
+/* 센서 달 */
+.moon { --level: 0; width: min(72vw, 360px); aspect-ratio: 1; margin: 0 auto; animation: moon-float 6s ease-in-out infinite alternate; }
+.moon img { display: block; width: 100%; height: 100%; object-fit: contain;
+  filter: brightness(calc(0.25 + 0.75 * var(--level))) drop-shadow(0 0 calc(var(--level) * 48px) var(--moon-glow));
+  transition: filter .4s; }
+.moon[data-power="off"] img { filter: brightness(0.12) grayscale(1); }
+@keyframes moon-float { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+@media (prefers-reduced-motion: reduce) { .moon { animation: none; } }
+
+:root {
+  --content-max: 1120px;
+  --description-max: 640px;
+  --moon-stage-min: 70vh;
+  --touch-target: 44px;
+  --switch-width: 52px;
+  --switch-height: 32px;
+  --switch-handle: 24px;
+  --switch-shift: 20px;
+  --status-dot: 8px;
+  --chart-height: 200px;
+  --visual-width: min(78vw, 420px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--surface);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+p,
+h1 {
+  margin: 0;
+}
+
+.app-shell {
+  width: min(100%, var(--content-max));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+}
+
+.product-header {
+  width: 100%;
+}
+
+.concept {
+  margin-top: var(--space-1);
+}
+
+.description {
+  max-width: var(--description-max);
+  margin-top: var(--space-3);
+  color: var(--ink-muted);
+}
+
+.placeholder,
+.demo-note {
+  color: var(--ink-muted);
+}
+
+.demo-note {
+  margin-top: var(--space-3);
+}
+
+.moon-section {
+  min-height: var(--moon-stage-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.light-visual {
+  --level: 0;
+  --shift-x: 0%;
+  --shift-y: 0%;
+  --visual-scale: 1.08;
+  width: var(--visual-width);
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.light-visual img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  filter: brightness(calc(0.45 + 0.55 * var(--level)))
+    saturate(calc(0.7 + 0.5 * var(--level)));
+  transform: translate3d(var(--shift-x), var(--shift-y), 0)
+    scale(var(--visual-scale));
+  transition:
+    filter 400ms,
+    transform 700ms;
+}
+
+.light-visual[data-power="off"] img {
+  filter: brightness(0.12) grayscale(1);
+}
+
+.sensor-value {
+  margin-top: var(--space-6);
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.control-row {
+  min-height: var(--touch-target);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.control-name {
+  color: var(--ink);
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.status-dot {
+  width: var(--status-dot);
+  height: var(--status-dot);
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-disconnected,
+.status-connecting {
+  color: var(--ink-muted);
+}
+
+.status-connecting .status-dot {
+  background: var(--brand);
+}
+
+.status-connected {
+  color: var(--status-on);
+}
+
+.status-error,
+.power-error {
+  color: var(--danger);
+}
+
+.action-button {
+  min-height: var(--touch-target);
+  padding: var(--space-3) var(--space-4);
+  color: var(--on-brand);
+  background: var(--brand);
+}
+
+.action-button.secondary {
+  color: var(--surface);
+  background: var(--ink);
+}
+
+.power-status {
+  margin-top: var(--space-1);
+  color: var(--ink-muted);
+}
+
+.power-switch {
+  width: var(--switch-width);
+  min-width: var(--touch-target);
+  height: var(--touch-target);
+  min-height: var(--touch-target);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+}
+
+.switch-track {
+  width: var(--switch-width);
+  height: var(--switch-height);
+  display: flex;
+  align-items: center;
+  padding: var(--space-1);
+  background: var(--off);
+}
+
+.power-switch[aria-checked="true"] .switch-track {
+  background: var(--brand);
+}
+
+.switch-handle {
+  width: var(--switch-handle);
+  height: var(--switch-handle);
+  display: block;
+  background: var(--surface);
+  transform: translateX(0);
+  transition: transform 150ms;
+}
+
+.power-switch[aria-checked="true"] .switch-handle {
+  background: var(--on-brand);
+  transform: translateX(var(--switch-shift));
+}
+
+.power-error {
+  margin-top: var(--space-2);
+}
+
+.chart-section {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--chart-height);
+}
+
+.empty-chart {
+  padding: var(--space-8) 0;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.sensor-chart {
+  width: 100%;
+  height: var(--chart-height);
+  display: block;
+  overflow: visible;
+}
+
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart-label {
+  fill: var(--ink-muted);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --visual-width: min(42vw, 520px);
+  }
+
+  .app-shell {
+    padding: var(--space-12) var(--space-8);
+  }
+
+  .data-grid {
+    grid-template-columns: 1fr 2fr;
+    gap: var(--space-12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light-visual img,
+  .switch-handle {
+    transition: none;
+  }
+}
