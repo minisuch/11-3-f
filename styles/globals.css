@@ -51,6 +51,9 @@ button { border: 0; border-radius: 0; }
 
 :root {
   --content-max: 1120px;
+  --control-fill: rgba(255, 255, 255, 0.74);
+  --control-fill-soft: rgba(255, 255, 255, 0.38);
+  --control-fill-strong: rgba(255, 255, 255, 0.86);
   --description-max: 640px;
   --moon-stage-min: 70vh;
   --touch-target: 44px;
@@ -60,6 +63,8 @@ button { border: 0; border-radius: 0; }
   --switch-shift: 20px;
   --status-dot: 8px;
   --chart-height: 200px;
+  --chart-max: 720px;
+  --visual-opacity: 0.78;
   --visual-width: min(78vw, 420px);
 }
 
@@ -95,6 +100,8 @@ h1 {
 .app-shell {
   width: min(100%, var(--content-max));
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
   margin: 0 auto;
   padding: var(--space-8) var(--space-4);
 }
@@ -134,10 +141,14 @@ h1 {
   --level: 0;
   --shift-x: 0%;
   --shift-y: 0%;
-  --visual-scale: 1.08;
-  width: var(--visual-width);
-  aspect-ratio: 3 / 4;
+  --visual-scale: 1.22;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .light-visual img {
@@ -145,6 +156,7 @@ h1 {
   height: 100%;
   display: block;
   object-fit: cover;
+  opacity: var(--visual-opacity);
   filter: brightness(calc(0.45 + 0.55 * var(--level)))
     saturate(calc(0.7 + 0.5 * var(--level)));
   transform: translate3d(var(--shift-x), var(--shift-y), 0)
@@ -155,7 +167,7 @@ h1 {
 }
 
 .light-visual[data-power="off"] img {
-  filter: brightness(0.12) grayscale(1);
+  filter: brightness(0.28) grayscale(0.65);
 }
 
 .sensor-value {
@@ -222,13 +234,13 @@ h1 {
 .action-button {
   min-height: var(--touch-target);
   padding: var(--space-3) var(--space-4);
-  color: var(--on-brand);
-  background: var(--brand);
+  color: var(--surface);
+  background: var(--control-fill);
 }
 
 .action-button.secondary {
   color: var(--surface);
-  background: var(--ink);
+  background: var(--control-fill);
 }
 
 .power-status {
@@ -254,11 +266,11 @@ h1 {
   display: flex;
   align-items: center;
   padding: var(--space-1);
-  background: var(--off);
+  background: var(--control-fill-soft);
 }
 
 .power-switch[aria-checked="true"] .switch-track {
-  background: var(--brand);
+  background: var(--control-fill-strong);
 }
 
 .switch-handle {
@@ -271,7 +283,7 @@ h1 {
 }
 
 .power-switch[aria-checked="true"] .switch-handle {
-  background: var(--on-brand);
+  background: var(--surface);
   transform: translateX(var(--switch-shift));
 }
 
@@ -281,8 +293,10 @@ h1 {
 
 .chart-section {
   width: 100%;
+  max-width: var(--chart-max);
   min-width: 0;
   min-height: var(--chart-height);
+  justify-self: center;
 }
 
 .empty-chart {

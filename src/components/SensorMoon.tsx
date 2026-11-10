@@ -29,7 +29,7 @@ export default function SensorMoon({ value, power }: Props) {
     "--level": level,
     "--shift-x": `${(0.5 - level) * 12}%`,
     "--shift-y": `${(0.5 - level) * -16}%`,
-    "--visual-scale": 1.08 + level * 0.1,
+    "--visual-scale": 1.22 + level * 0.08,
   } as VisualStyle
 
   return (
